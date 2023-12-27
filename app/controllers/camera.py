@@ -5,22 +5,48 @@ import numpy as np
 class Camera:
     def __init__(self):
         self.cap = cv.VideoCapture(0)
-        self.font = cv.FONT_HERSHEY_SIMPLEX
         self.fps = int(self.cap.get(cv.CAP_PROP_FPS))
-        
+    
+    def is_opened(self):
+        if not self.cap.isOpened():
+            print("Cannot open camera")
+            exit()
+    
     def get_frame(self):
         ret, frame = self.cap.read()
         return ret, frame
     
+    def generate_frames(self):
+        while True:
+            success, frame = self.cap.read()
+            if not success:
+                break
+            else:
+                ret, buffer = cv.imencode('.jpg', frame)
+                frame = buffer.tobytes()
+                yield (b'--frame\r\n'
+                    b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
+    
     def release(self):
+        print('Finished.')
         self.cap.release()
         cv.destroyAllWindows()
-
+        
 
 class Frame:
     def __init__(self, frame):
         self.frame = frame
+        self.font = cv.FONT_HERSHEY_SIMPLEX
         self.height, self.width, self.channels = frame.shape
+        self.colors = {
+            'blue': (255, 127, 0),
+            'red': (50, 50, 255),
+            'green': (127, 255, 0),
+            'dark_blue': (127, 20, 0),
+            'light_green': (127, 233, 100),
+            'yellow': (0, 255, 255),
+            'pink': (255, 0, 255),
+        }
     
     def add_meta_info(self, frame, text, font, color, position):
         w, h = self.height, self.width
