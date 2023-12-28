@@ -18,7 +18,7 @@ function addMenuCard(route, title, imageSrc) {
         
         <a href="${route}" class="font-bold text-white rounded-full bg-blue-500 p-2 text-center flex items-center justify-center gap-3">
             <div class="w-6 h-6">${iconCamera()}</div>
-            <span>Buka Kamera</span>
+            <span class="hidden sm:inline">Buka Kamera</span>
         </a>
     `;
     document.getElementById("main-menu").appendChild(menuCard);
@@ -26,4 +26,4 @@ function addMenuCard(route, title, imageSrc) {
 
 addMenuCard("/craniovertebra", "Craniovertebra Angle", "https://www.researchgate.net/profile/Walaa-Elsayed/publication/347892270/figure/fig1/AS:972676877283329@1608915647914/Measurement-of-Craniovertebral-angle.ppm")
 
-addMenuCard("/fsa", "Forward Shoulder Angle", "https://www.researchgate.net/profile/Darin-Padua/publication/41122480/figure/fig1/AS:394259766235139@1471010261363/Forward-head-angle-FHA-measured-from-the-vertical-anteriorly-to-a-line-connecting-the.png")
+addMenuCard("/forward_shoulder", "Forward Shoulder Angle", "https://www.researchgate.net/profile/Darin-Padua/publication/41122480/figure/fig1/AS:394259766235139@1471010261363/Forward-head-angle-FHA-measured-from-the-vertical-anteriorly-to-a-line-connecting-the.png")
