@@ -14,12 +14,45 @@ class CarryingAngle:
     def find_distance(self, x1, y1, x2, y2):
         return math.sqrt((x2 - x1)**2 + (y2 - y1)**2)
     
-    def find_angle(self, x1, y1, x2, y2, facing = None):
+    def find_endpoint(self, point, distance, angle):
+        rad = math.radians(angle)
+        
+        x = int(point[0] + distance * np.sin(rad))
+        y = int(point[1] + distance * np.cos(rad))
+        
+        return x, y
+    
+    def find_angle(self, x1, y1, x2, y2):
         theta = math.acos( (y2 -y1)*(-y1) / (math.sqrt(
         (x2 - x1)**2 + (y2 - y1)**2 ) * y1) )
         degree = int(180/math.pi)*theta
 
         return degree
+    
+    def find_angle_mid(self, p1, p2, p3):
+        x1, y1 = p1
+        x2, y2 = p2
+        x3, y3 = p3
+        
+        # Vektor BA dan BC
+        vec_BA = (x1 - x2, y1 - y2)
+        vec_BC = (x3 - x2, y3 - y2)
+
+        # Dot product
+        dot_product = vec_BA[0] * vec_BC[0] + vec_BA[1] * vec_BC[1]
+
+        # Magnitudo BA dan BC
+        mag_BA = math.sqrt((x1 - x2)**2 + (y1 - y2)**2)
+        mag_BC = math.sqrt((x3 - x2)**2 + (y3 - y2)**2)
+
+        # Cosinus theta
+        cos_theta = dot_product / (mag_BA * mag_BC)
+
+        # Sudut dalam radian
+        theta_rad = math.acos(cos_theta)
+        degree = math.degrees(theta_rad)
+
+        return degree 
         
     def get_landmarks(self, frame):
         frame.flags.writeable = False
@@ -84,6 +117,28 @@ class CarryingAngle:
         
         cv.line(frame, center, end_point, color, 2)
     
+    def draw_angle_indicator(self, frame, center, radius, start_angle, end_angle, color):
+        # Convert angles to radians
+        start_angle_rad = math.radians(start_angle)
+        end_angle_rad = math.radians(end_angle)
+
+        # Calculate start and end points of the arc
+        start_point = (
+            int(center[0] - radius * np.cos(start_angle_rad)),
+            int(center[1] - radius * np.sin(start_angle_rad))
+        )
+        end_point = (
+            int(center[0] - radius * np.cos(end_angle_rad)),
+            int(center[1] - radius * np.sin(end_angle_rad))
+        )
+
+        # Draw the arc on the frame
+        cv.ellipse(frame, center, (radius, radius), 0, start_angle, end_angle, color, 2)
+
+        # Draw lines connecting the center to the start and end points
+        cv.line(frame, center, start_point, color, 2)
+        cv.line(frame, center, end_point, color, 2)
+    
     def get_angle(self, fr, frame, keypoints, w, h, font, colors):
         l_shldr_x, l_shldr_y = keypoints["l_shldr_x"], keypoints["l_shldr_y"]
         r_shldr_x, r_shldr_y = keypoints["r_shldr_x"], keypoints["r_shldr_y"]
@@ -123,8 +178,7 @@ class CarryingAngle:
         cv.line(frame, (l_shldr_x, l_shldr_y), (l_shldr_x, l_shldr_y - 50), pink, 2)
         
         # Get angle between left shoulder and left wrist
-        elbow_shldr_angle = self.find_angle(l_elbow_x, l_elbow_y, l_shldr_x, l_shldr_y)    
-        cv.putText(frame, str(int(elbow_shldr_angle)), (l_shldr_x - 50, l_shldr_y - 50), font, 0.9, green, 2)
+        elbow_shldr_angle = self.find_angle(l_elbow_x, l_elbow_y, l_shldr_x, l_shldr_y)
         
         cv.line(frame, (l_shldr_x, l_shldr_y), (l_elbow_x, l_elbow_y), yellow, 2)
         
@@ -137,13 +191,30 @@ class CarryingAngle:
         
         # Get angle between left elbow and left wrist
         wrist_elbow_angle = self.find_angle(l_wrist_x, l_wrist_y, l_elbow_x, l_elbow_y)
-        cv.putText(frame, str(int(wrist_elbow_angle)), (l_elbow_x - 50, l_elbow_y - 50), font, 0.9, green, 2)
         
         cv.line(frame, (l_elbow_x, l_elbow_y), (l_wrist_x, l_wrist_y), yellow, 2)
         
         # Draw line over lower arm
         self.draw_line_over(frame, (l_elbow_x, l_elbow_y), 200, wrist_elbow_angle, 1, yellow)
         self.draw_line_over(frame, (l_wrist_x, l_wrist_y), 200, wrist_elbow_angle, -1, yellow)
+        
+        x_end, y_end = self.find_endpoint((l_elbow_x, l_elbow_y), shldr_to_wrist, elbow_shldr_angle)
+        cv.circle(frame, (x_end, y_end), 7, green, -1)
+        
+        carrying_angle = self.find_angle_mid((l_wrist_x, l_wrist_y), (l_elbow_x, l_elbow_y), (x_end, y_end))
+        cv.putText(frame, str(int(carrying_angle)), (l_elbow_x + 20, l_elbow_y - 20), font, 0.9, yellow, 2)
+        
+        carrying_angle_text = 'Carrying angle: ' + str(int(carrying_angle))
+        cv.putText(frame, carrying_angle_text, (10, 30), font, 0.9, yellow, 2)
+        
+        # self.draw_angle_indicator(frame, (l_elbow_x, l_elbow_y), 50, elbow_shldr_angle, wrist_elbow_angle, yellow)
+        
+        if carrying_angle < 5:
+            cv.putText(frame, 'cubitus varus', (10, 70), font, 0.9, yellow, 2)
+        elif carrying_angle >= 5 and carrying_angle <= 15:
+            cv.putText(frame, 'normal', (10, 70), font, 0.9, yellow, 2)
+        else:
+            cv.putText(frame, 'cubitus valgus', (10, 70), font, 0.9, yellow, 2)
         
 
     def run(self):

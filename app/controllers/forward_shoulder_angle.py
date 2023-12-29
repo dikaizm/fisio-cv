@@ -197,7 +197,7 @@ class ForwardShoulderAngle:
                 keypoints = self.get_keypoints(lm, lm_pose, fr.width, fr.height)
                 self.get_angle(fr, frame, keypoints, fr.width, fr.height, fr.font, fr.colors)
             
-            self.show_landmarks(frame, lm)
+            # self.show_landmarks(frame, lm)
             
             # cv.imshow('Craniovertebra Angle', frame)
             # if cv.waitKey(1) & 0xFF == 27:

@@ -21,7 +21,9 @@ function addMenuCard(route, title, imageSrc) {
             <span class="hidden sm:inline">Buka Kamera</span>
         </a>
     `;
-    document.getElementById("main-menu").appendChild(menuCard);
+    
+    mainMenu = document.getElementById("main-menu");
+    if (mainMenu) mainMenu.appendChild(menuCard);
 }
 
 addMenuCard("/craniovertebra", "Craniovertebra Angle", "https://www.researchgate.net/profile/Walaa-Elsayed/publication/347892270/figure/fig1/AS:972676877283329@1608915647914/Measurement-of-Craniovertebral-angle.ppm")
