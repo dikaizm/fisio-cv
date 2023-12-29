@@ -3,7 +3,7 @@ import mediapipe as mp
 import math
 from controllers.camera import Camera, Frame
 
-class CraniovertebraAngle:
+class ForwardShoulderAngle:
     def __init__(self):
         self.mp_pose = mp.solutions.pose
         self.pose = self.mp_pose.Pose(min_detection_confidence=0.5, min_tracking_confidence=0.5)
@@ -14,13 +14,14 @@ class CraniovertebraAngle:
         return math.sqrt((x2 - x1)**2 + (y2 - y1)**2)
     
     def find_angle(self, x1, y1, x2, y2, facing):
-        theta = math.atan2(y2 - y1, x2 - x1)
-        degree = int(math.degrees(theta))
+        theta = math.acos( (y2 -y1)*(-y1) / (math.sqrt(
+        (x2 - x1)**2 + (y2 - y1)**2 ) * y1) )
+        degree = int(180/math.pi)*theta
 
-        if facing == "left":
-            degree += 180
-        else:
-            degree *= -1
+        # if facing == "left":
+        #     degree += 180
+        # else:
+        #     degree *= -1
 
         return degree
     
@@ -129,20 +130,23 @@ class CraniovertebraAngle:
         cv.circle(frame, (c7_x, c7_y), 7, pink, -1)
         cv.circle(frame, (mx, my), 7, yellow, -1)
         
-        # Draw imaginary horizontal line from midpoint.
-        cv.line(frame, (c7_x - 300, c7_y), (c7_x + 300, c7_y), yellow, 2)
-        cv.circle(frame, (c7_x - 300, c7_y), 7, yellow, -1)
-        cv.circle(frame, (c7_x + 300, c7_y), 7, yellow, -1)
-        
         # Connect shoulder to c7 point
         cv.line(frame, (l_shldr_x, l_shldr_y), (c7_x, c7_y), yellow, 2)
         cv.line(frame, (r_shldr_x, r_shldr_y), (c7_x, c7_y), yellow, 2)
         
+        # Draw imaginary horizontal line from midpoint.
+        cv.line(frame, (c7_x - 50, c7_y), (c7_x + 50, c7_y), yellow, 2)
+        
         # Draw imaginary vertical line from midpoint.
-        cv.line(frame, (c7_x, c7_y - 50), (c7_x, c7_y + 50), yellow, 2)
+        cv.line(frame, (c7_x, c7_y - 200), (c7_x, c7_y + 200), yellow, 2)
+        cv.circle(frame, (c7_x, c7_y - 200), 7, yellow, -1)
+        cv.circle(frame, (c7_x, c7_y + 200), 7, yellow, -1)
         
         # Calculate angles.
-        neck_inclination = self.find_angle(c7_x, c7_y, trg_x, trg_y, facing)
+        if facing == 'left':
+            shoulder_angle = self.find_angle(l_shldr_x, l_shldr_y, c7_x, c7_y, facing)
+        else:
+            shoulder_angle = self.find_angle(r_shldr_x, r_shldr_y, c7_x, c7_y, facing)
 
         # Draw landmarks.
         cv.circle(frame, (l_shldr_x, l_shldr_y), 7, green, -1)
@@ -150,23 +154,22 @@ class CraniovertebraAngle:
         # cv.circle(frame, (l_shldr_x, l_shldr_y - 100), 7, yellow, -1)
         cv.circle(frame, (r_shldr_x, r_shldr_y), 7, red, -1)
 
-        fr.draw_angle_indicator(frame, (c7_x, c7_y), 50, 0, neck_inclination, yellow)
+        # fr.draw_angle_indicator(frame, (c7_x, c7_y), 50, 0, shoulder_angle, yellow)
 
-        # Put text, Posture and angle inclination.
         # Text string for display.
-        angle_text_string = 'Angle: ' + str(int(neck_inclination))
+        shoulder_angle_text = 'Shoulder angle: ' + str(int(shoulder_angle))
 
-        # The threshold angles to determine posture condition.
-        if neck_inclination >= 48 and neck_inclination <= 90:
-            cv.putText(frame, angle_text_string, (10, 30), font, 0.9, green, 2)
-            cv.putText(frame, str(int(neck_inclination)), (c7_x + 10, c7_y - 10), font, 0.9, green, 2)
+        # The threshold angles to determine posture condition
+        if shoulder_angle >= 0 and shoulder_angle <= 22:
+            cv.putText(frame, shoulder_angle_text, (10, 30), font, 0.9, green, 2)
+            cv.putText(frame, str(int(shoulder_angle)), (c7_x + 10, c7_y - 10), font, 0.9, green, 2)
 
             # Join landmarks.
             cv.line(frame, (c7_x, c7_y), (trg_x, trg_y), green, 4)
 
         else:
-            cv.putText(frame, angle_text_string, (10, 30), font, 0.9, red, 2)
-            cv.putText(frame, str(int(neck_inclination)), (c7_x + 10, c7_y - 10), font, 0.9, red, 2)
+            cv.putText(frame, shoulder_angle_text, (10, 30), font, 0.9, red, 2)
+            cv.putText(frame, str(int(shoulder_angle)), (c7_x + 10, c7_y - 10), font, 0.9, red, 2)
 
             # Join landmarks.
             cv.line(frame, (c7_x, c7_y), (trg_x, trg_y), red, 4)
@@ -189,7 +192,7 @@ class CraniovertebraAngle:
                 keypoints = self.get_keypoints(lm, lm_pose, fr.width, fr.height)
                 self.get_angle(fr, frame, keypoints, fr.width, fr.height, fr.font, fr.colors)
             
-            # self.show_landmarks(frame, lm)
+            self.show_landmarks(frame, lm)
             
             # cv.imshow('Craniovertebra Angle', frame)
             # if cv.waitKey(1) & 0xFF == 27:

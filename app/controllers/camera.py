@@ -4,7 +4,7 @@ import numpy as np
 
 class Camera:
     def __init__(self):
-        self.cap = cv.VideoCapture(0)
+        self.cap = cv.VideoCapture(1)
         self.fps = int(self.cap.get(cv.CAP_PROP_FPS))
     
     def is_opened(self):
