@@ -60,3 +60,5 @@ python3 app.py
 # On Windows
 python app.py
 ```
+
+The app should now be running. Open http://localhost:8010 in browser to access it.
