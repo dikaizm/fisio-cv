@@ -2,6 +2,7 @@ from flask import render_template, Response, jsonify
 from controllers.craniovertebra_angle import CraniovertebraAngle
 from controllers.forward_shoulder_angle import ForwardShoulderAngle
 from controllers.carrying_angle import CarryingAngle
+from controllers.q_angle import QAngle
 from controllers.camera import Record
 
 class Routes:
@@ -10,12 +11,14 @@ class Routes:
         self.cv = CraniovertebraAngle()
         self.fsa = ForwardShoulderAngle()
         self.carry = CarryingAngle()
+        self.q = QAngle()
 
     def setup(self):
         self.index()
         self.craniovertebra()
         self.forward_shoulder()
         self.carrying()
+        self.q_angle()
 
     # Home
     def index(self):
@@ -76,6 +79,24 @@ class Routes:
             res = self.carry.results
             if res:
                 Record.save_result('carrying', res)
+                return jsonify("success")
+            else:
+                return jsonify("failed")
+            
+    def q_angle(self):
+        @self.app.route('/q_angle')
+        def q_angle():
+            return render_template('q_angle.html')
+        
+        @self.app.route('/q_angle_vid')
+        def q_angle_vid():
+            return Response(self.q.run(), mimetype='multipart/x-mixed-replace; boundary=frame')
+        
+        @self.app.route('/record_q')
+        def record_q():
+            res = self.q.results
+            if res:
+                Record.save_result('q_angle', res)
                 return jsonify("success")
             else:
                 return jsonify("failed")

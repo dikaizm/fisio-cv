@@ -32,6 +32,8 @@ addMenuCard("/forward_shoulder", "Forward Shoulder Angle", "https://www.research
 
 addMenuCard("/carrying", "Carrying Angle", "https://clinicalgate.com/wp-content/uploads/2015/03/F000067f006-008-9781455709779.jpg")
 
+addMenuCard("/q_angle", "Q Angle", "https://www.researchgate.net/profile/Alfred-Atanda/publication/38062380/figure/fig13/AS:394157177753602@1470985802902/The-Q-angle-is-defined-as-the-angle-between-a-line-drawn-from-the-anterior-superior-iliac.png")
+
 
 function saveData(endpoint) {
     let xhr = new XMLHttpRequest();
@@ -76,5 +78,10 @@ if (currEndpoint == "/craniovertebra") {
 if (currEndpoint == "/forward_shoulder") {
     document.getElementById("btn_record_fsa").addEventListener("click", function() {
         saveData("/record_fsa")
+    });
+}
+if (currEndpoint == "/q_angle") {
+    document.getElementById("btn_record_q").addEventListener("click", function() {
+        saveData("/record_q")
     });
 }

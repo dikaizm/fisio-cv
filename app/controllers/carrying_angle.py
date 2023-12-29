@@ -89,8 +89,6 @@ class CarryingAngle:
         # Right wrist
         keypoints["r_wrist_x"] = int(lm.landmark[lm_pose.RIGHT_WRIST].x * w)
         keypoints["r_wrist_y"] = int(lm.landmark[lm_pose.RIGHT_WRIST].y * h)
-        # Nose
-        keypoints["nose_x"] = int(lm.landmark[lm_pose.NOSE].x * w)
         
         return keypoints
     
@@ -149,7 +147,6 @@ class CarryingAngle:
         r_elbow_x, r_elbow_y = keypoints["r_elbow_x"], keypoints["r_elbow_y"]
         l_wrist_x, l_wrist_y = keypoints["l_wrist_x"], keypoints["l_wrist_y"]
         r_wrist_x, r_wrist_y = keypoints["r_wrist_x"], keypoints["r_wrist_y"]
-        nose_x = keypoints["nose_x"]
         
         green = colors["green"]
         red = colors["red"]
