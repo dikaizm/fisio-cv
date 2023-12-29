@@ -1,6 +1,7 @@
 from flask import render_template, Response
 from controllers.craniovertebra_angle import CraniovertebraAngle
 from controllers.forward_shoulder_angle import ForwardShoulderAngle
+from controllers.carrying_angle import CarryingAngle
 from controllers.camera import Camera
 
 class Routes:
@@ -11,6 +12,7 @@ class Routes:
         self.index()
         self.craniovertebra()
         self.forward_shoulder()
+        self.carrying()
 
     # Home
     def index(self):
@@ -37,3 +39,12 @@ class Routes:
         @self.app.route('/forward_shoulder_vid')
         def forward_shoulder_vid():
             return Response(ForwardShoulderAngle().run(), mimetype='multipart/x-mixed-replace; boundary=frame')
+        
+    def carrying(self):
+        @self.app.route('/carrying')
+        def carrying():
+            return render_template('carrying.html')
+
+        @self.app.route('/carrying_vid')
+        def carrying_vid():
+            return Response(CarryingAngle().run(), mimetype='multipart/x-mixed-replace; boundary=frame')
