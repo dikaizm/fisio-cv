@@ -1,3 +1,5 @@
+from datetime import datetime
+import time
 import cv2 as cv
 import mediapipe as mp
 import math
@@ -10,6 +12,7 @@ class CarryingAngle:
         self.pose = self.mp_pose.Pose(min_detection_confidence=0.5, min_tracking_confidence=0.5)
         self.mp_draw = mp.solutions.drawing_utils
         self.mp_draw_style = mp.solutions.drawing_styles
+        self.results = []
 
     def find_distance(self, x1, y1, x2, y2):
         return math.sqrt((x2 - x1)**2 + (y2 - y1)**2)
@@ -203,6 +206,9 @@ class CarryingAngle:
         
         carrying_angle = self.find_angle_mid((l_wrist_x, l_wrist_y), (l_elbow_x, l_elbow_y), (x_end, y_end))
         cv.putText(frame, str(int(carrying_angle)), (l_elbow_x + 20, l_elbow_y - 20), font, 0.9, yellow, 2)
+        
+        # Save results
+        self.results.append((int(carrying_angle), datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S')))
         
         carrying_angle_text = 'Carrying angle: ' + str(int(carrying_angle))
         cv.putText(frame, carrying_angle_text, (10, 30), font, 0.9, yellow, 2)

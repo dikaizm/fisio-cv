@@ -1,3 +1,5 @@
+import csv
+import os
 import cv2 as cv
 import math
 import numpy as np
@@ -76,3 +78,14 @@ class Frame:
         # Draw lines connecting the center to the start and end points
         cv.line(frame, center, start_point, color, 2)
         cv.line(frame, center, end_point, color, 2)
+        
+class Record:
+    def save_result(filename, result):
+        dir = 'results'
+        # Check if directory exists
+        if not os.path.exists(dir):
+            os.makedirs(dir)
+        
+        with open(f'{dir}/{filename}.csv', 'w', newline='') as csvfile:
+            writer = csv.writer(csvfile)
+            writer.writerows(result[:5])

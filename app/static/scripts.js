@@ -31,3 +31,50 @@ addMenuCard("/craniovertebra", "Craniovertebra Angle", "https://www.researchgate
 addMenuCard("/forward_shoulder", "Forward Shoulder Angle", "https://www.researchgate.net/profile/Darin-Padua/publication/41122480/figure/fig1/AS:394259766235139@1471010261363/Forward-head-angle-FHA-measured-from-the-vertical-anteriorly-to-a-line-connecting-the.png")
 
 addMenuCard("/carrying", "Carrying Angle", "https://clinicalgate.com/wp-content/uploads/2015/03/F000067f006-008-9781455709779.jpg")
+
+
+function saveData(endpoint) {
+    let xhr = new XMLHttpRequest();
+    // Configure the request
+    xhr.open("GET", endpoint, true);
+
+    // Set up event handlers
+    xhr.onload = function () {
+        if (xhr.status >= 200 && xhr.status < 300) {
+            // Successful response handling
+            // console.log(xhr.responseText);
+            alert("Data berhasil direkam");
+        } else {
+            // Error response handling
+            // console.error("Error in API call:", xhr.status, xhr.statusText);
+            alert("Terjadi kesalahan saat merekam data");
+        }
+    };
+
+    xhr.onerror = function () {
+        // Network error handling
+        console.error("Network error occurred");
+        alert("Terjadi kesalahan saat merekam data");
+    };
+
+    // Send the request
+    xhr.send(); 
+}
+
+var currEndpoint = window.location.pathname;
+
+if (currEndpoint == "/carrying") {
+    document.getElementById("btn_record_carry").addEventListener("click", function() {
+        saveData("/record_carry")
+    });
+}
+if (currEndpoint == "/craniovertebra") {
+    document.getElementById("btn_record_cv").addEventListener("click", function() {
+        saveData("/record_cv")
+    });
+}
+if (currEndpoint == "/forward_shoulder") {
+    document.getElementById("btn_record_fsa").addEventListener("click", function() {
+        saveData("/record_fsa")
+    });
+}

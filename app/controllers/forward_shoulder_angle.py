@@ -1,3 +1,5 @@
+from datetime import datetime
+import time
 import cv2 as cv
 import mediapipe as mp
 import math
@@ -9,6 +11,7 @@ class ForwardShoulderAngle:
         self.pose = self.mp_pose.Pose(min_detection_confidence=0.5, min_tracking_confidence=0.5)
         self.mp_draw = mp.solutions.drawing_utils
         self.mp_draw_style = mp.solutions.drawing_styles
+        self.results = []
 
     def find_distance(self, x1, y1, x2, y2):
         return math.sqrt((x2 - x1)**2 + (y2 - y1)**2)
@@ -145,6 +148,9 @@ class ForwardShoulderAngle:
             shoulder_angle = self.find_angle(l_shldr_x, l_shldr_y, c7_x, c7_y)
         else:
             shoulder_angle = self.find_angle(r_shldr_x, r_shldr_y, c7_x, c7_y)
+
+        # Save results
+        self.results.append((int(shoulder_angle), datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S')))
 
         # Draw landmarks.
         cv.circle(frame, (l_shldr_x, l_shldr_y), 7, green, -1)
