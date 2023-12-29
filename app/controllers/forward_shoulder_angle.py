@@ -13,15 +13,10 @@ class ForwardShoulderAngle:
     def find_distance(self, x1, y1, x2, y2):
         return math.sqrt((x2 - x1)**2 + (y2 - y1)**2)
     
-    def find_angle(self, x1, y1, x2, y2, facing):
+    def find_angle(self, x1, y1, x2, y2, facing = None):
         theta = math.acos( (y2 -y1)*(-y1) / (math.sqrt(
         (x2 - x1)**2 + (y2 - y1)**2 ) * y1) )
         degree = int(180/math.pi)*theta
-
-        # if facing == "left":
-        #     degree += 180
-        # else:
-        #     degree *= -1
 
         return degree
     
@@ -112,10 +107,10 @@ class ForwardShoulderAngle:
         # Get tragus
         if facing == 'left':
             l_eye_to_ear = self.find_distance(l_eye_x, l_eye_y, l_ear_x, l_ear_y)
-            trg_x, trg_y = int(l_ear_x + (l_eye_to_ear / 2)), int(l_ear_y - (l_eye_to_ear / 4))
+            trg_x, trg_y = int(l_ear_x + (l_eye_to_ear / 2)), int(l_ear_y - (l_eye_to_ear / 6))
         else:
             r_eye_to_ear = self.find_distance(r_eye_x, r_eye_y, r_ear_x, r_ear_y)
-            trg_x, trg_y = int(r_ear_x - (r_eye_to_ear / 2)), int(r_ear_y - (r_eye_to_ear / 4))
+            trg_x, trg_y = int(r_ear_x - (r_eye_to_ear / 2)), int(r_ear_y - (r_eye_to_ear / 6))
 
         cv.circle(frame, (trg_x, trg_y), 7, pink, -1)
 
@@ -134,6 +129,9 @@ class ForwardShoulderAngle:
         cv.line(frame, (l_shldr_x, l_shldr_y), (c7_x, c7_y), yellow, 2)
         cv.line(frame, (r_shldr_x, r_shldr_y), (c7_x, c7_y), yellow, 2)
         
+        # Connect tragus to c7 point
+        cv.line(frame, (trg_x, trg_y), (c7_x, c7_y), yellow, 2)
+        
         # Draw imaginary horizontal line from midpoint.
         cv.line(frame, (c7_x - 50, c7_y), (c7_x + 50, c7_y), yellow, 2)
         
@@ -144,9 +142,9 @@ class ForwardShoulderAngle:
         
         # Calculate angles.
         if facing == 'left':
-            shoulder_angle = self.find_angle(l_shldr_x, l_shldr_y, c7_x, c7_y, facing)
+            shoulder_angle = self.find_angle(l_shldr_x, l_shldr_y, c7_x, c7_y)
         else:
-            shoulder_angle = self.find_angle(r_shldr_x, r_shldr_y, c7_x, c7_y, facing)
+            shoulder_angle = self.find_angle(r_shldr_x, r_shldr_y, c7_x, c7_y)
 
         # Draw landmarks.
         cv.circle(frame, (l_shldr_x, l_shldr_y), 7, green, -1)
@@ -160,19 +158,26 @@ class ForwardShoulderAngle:
         shoulder_angle_text = 'Shoulder angle: ' + str(int(shoulder_angle))
 
         # The threshold angles to determine posture condition
+        if facing == 'left':
+            shldr_x, shldr_y = l_shldr_x, l_shldr_y
+            text_pos = (c7_x + 30, c7_y + 40)
+        else:
+            shldr_x, shldr_y = r_shldr_x, r_shldr_y
+            text_pos = (c7_x - 50, c7_y + 40)
+        
         if shoulder_angle >= 0 and shoulder_angle <= 22:
             cv.putText(frame, shoulder_angle_text, (10, 30), font, 0.9, green, 2)
-            cv.putText(frame, str(int(shoulder_angle)), (c7_x + 10, c7_y - 10), font, 0.9, green, 2)
+            cv.putText(frame, str(int(shoulder_angle)), text_pos, font, 0.9, green, 2)
 
             # Join landmarks.
-            cv.line(frame, (c7_x, c7_y), (trg_x, trg_y), green, 4)
+            cv.line(frame, (shldr_x, shldr_y), (c7_x, c7_y), green, 4)
 
         else:
             cv.putText(frame, shoulder_angle_text, (10, 30), font, 0.9, red, 2)
-            cv.putText(frame, str(int(shoulder_angle)), (c7_x + 10, c7_y - 10), font, 0.9, red, 2)
+            cv.putText(frame, str(int(shoulder_angle)), text_pos, font, 0.9, red, 2)
 
             # Join landmarks.
-            cv.line(frame, (c7_x, c7_y), (trg_x, trg_y), red, 4)
+            cv.line(frame, (shldr_x, shldr_y), (c7_x, c7_y), red, 4)
     
     
     def run(self):
