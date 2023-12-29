@@ -1,3 +1,4 @@
 .DS_Store
 */.venv
 /docs
+*/__pycache__
