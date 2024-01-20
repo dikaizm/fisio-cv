@@ -5,7 +5,6 @@ import mediapipe as mp
 import math
 
 import numpy as np
-from app.controllers.color_detection import ColorDetection
 from controllers.camera import Camera, Frame
 
 class ForwardShoulderAngle:
@@ -29,25 +28,53 @@ class ForwardShoulderAngle:
 
         return degree
     
-    def get_keypoints(self, objects, w, h):
-        # object with higher position to lower
-        objects = sorted(objects, key=lambda x: x[1], reverse=True)
-        tragus = objects[0]
-        c7 = objects[1]
-        humerus = objects[2]
-        
+    def find_midpoint(self, x1, y1, x2, y2):
+        return (int((x1 + x2) / 2), int((y1 + y2) / 2))
+    
+    def get_landmarks(self, frame):
+        frame.flags.writeable = False
+        frame = cv.cvtColor(frame, cv.COLOR_BGR2RGB)
+        results = self.pose.process(frame)
+        frame.flags.writeable = True
+        frame = cv.cvtColor(frame, cv.COLOR_RGB2BGR)
+
+        lm = results.pose_landmarks
+        lm_pose = self.mp_pose.PoseLandmark
+
+        return lm, lm_pose
+    
+    def get_keypoints(self, lm, lm_pose, w, h):
         keypoints = {}
-        # Tragus
-        keypoints["tragus_x"] = tragus.x
-        keypoints["tragus_y"] = tragus.y
-        # C7
-        keypoints["c7_x"] = c7.x
-        keypoints["c7_y"] = c7.y
-        # Humerus
-        keypoints["humerus_x"] = humerus.x
-        keypoints["humerus_y"] = humerus.y
+        # Left shoulder
+        keypoints["l_shldr_x"] = int(lm.landmark[lm_pose.LEFT_SHOULDER].x * w)
+        keypoints["l_shldr_y"] = int(lm.landmark[lm_pose.LEFT_SHOULDER].y * h)
+        # Right shoulder
+        keypoints["r_shldr_x"] = int(lm.landmark[lm_pose.RIGHT_SHOULDER].x * w)
+        keypoints["r_shldr_y"] = int(lm.landmark[lm_pose.RIGHT_SHOULDER].y * h)
+        # Left ear
+        keypoints["l_ear_x"] = int(lm.landmark[lm_pose.LEFT_EAR].x * w)
+        keypoints["l_ear_y"] = int(lm.landmark[lm_pose.LEFT_EAR].y * h)
+        # Right ear
+        keypoints["r_ear_x"] = int(lm.landmark[lm_pose.RIGHT_EAR].x * w)
+        keypoints["r_ear_y"] = int(lm.landmark[lm_pose.RIGHT_EAR].y * h)
+        # Left outer eye
+        keypoints["l_eye_x"] = int(lm.landmark[lm_pose.LEFT_EYE_OUTER].x * w)
+        keypoints["l_eye_y"] = int(lm.landmark[lm_pose.LEFT_EYE_OUTER].y * h)
+        # Right outer eye
+        keypoints["r_eye_x"] = int(lm.landmark[lm_pose.RIGHT_EYE_OUTER].x * w)
+        keypoints["r_eye_y"] = int(lm.landmark[lm_pose.RIGHT_EYE_OUTER].y * h)
+        # Nose
+        keypoints["nose_x"] = int(lm.landmark[lm_pose.NOSE].x * w)
         
         return keypoints
+    
+    def show_landmarks(self, frame, lm):
+        self.mp_draw.draw_landmarks(
+            frame, 
+            lm, 
+            self.mp_pose.POSE_CONNECTIONS, 
+            landmark_drawing_spec=self.mp_draw_style.get_default_pose_landmarks_style()
+        )
     
     def get_angle(self, frame, keypoints, w, h, font, colors):
         l_shldr_x, l_shldr_y = keypoints["l_shldr_x"], keypoints["l_shldr_y"]
@@ -171,15 +198,16 @@ class ForwardShoulderAngle:
             
             fr = Frame(frame)
             frame = fr.frame
-            
-            objects = ColorDetection().get_objects(frame)
-            keypoints = self.get_keypoints(objects, fr.width, fr.height)
-            if keypoints:
+            lm, lm_pose = self.get_landmarks(frame)
+            if lm:
+                keypoints = self.get_keypoints(lm, lm_pose, fr.width, fr.height)
                 self.get_angle(frame, keypoints, fr.width, fr.height, fr.font, fr.colors)
-                        
+            
+            # self.show_landmarks(frame, lm)
+            
             # cv.imshow('Craniovertebra Angle', frame)
             # if cv.waitKey(1) & 0xFF == 27:
-            #     break #27 is ESC key
+            #     break #27 is ESC key.
             
             ret, buffer = cv.imencode('.jpg', frame)
             frame = buffer.tobytes()
