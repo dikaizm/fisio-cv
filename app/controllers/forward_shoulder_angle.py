@@ -1,11 +1,10 @@
 from datetime import datetime
 import time
 import cv2 as cv
-import mediapipe as mp
 import math
 
-from controllers.color_detection import ColorDetection, Point
-from controllers.camera import Camera, Frame
+from utils.color_detection import ColorDetection, Point
+from utils.camera import Camera, Frame
 
 class ForwardShoulderAngle:
     def __init__(self):
