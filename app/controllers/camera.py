@@ -3,6 +3,7 @@ import os
 import cv2 as cv
 import math
 import numpy as np
+from controllers.theme import Colors
 
 class Camera:
     def __init__(self):
@@ -18,28 +19,27 @@ class Camera:
         ret, frame = self.cap.read()
         return ret, frame
     
-    def generate_frames(self):
-        while True:
-            success, frame = self.cap.read()
-            if not success:
-                break
-            else:
-                ret, buffer = cv.imencode('.jpg', frame)
-                frame = buffer.tobytes()
-                yield (b'--frame\r\n'
-                    b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
+    # def generate_frames(self):
+    #     while True:
+    #         success, frame = self.cap.read()
+    #         if not success:
+    #             break
+    #         else:
+    #             ret, buffer = cv.imencode('.jpg', frame)
+    #             frame = buffer.tobytes()
+    #             yield (b'--frame\r\n'
+    #                 b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
     
     def release(self):
         print('Finished.')
         self.cap.release()
         cv.destroyAllWindows()
         
-
 class Frame:
-    def __init__(self, frame):
-        self.frame = frame
+    global_colors = Colors()
+    
+    def __init__(self):
         self.font = cv.FONT_HERSHEY_SIMPLEX
-        self.height, self.width, self.channels = frame.shape
         self.colors = {
             'blue': (255, 127, 0),
             'red': (50, 50, 255),
@@ -50,8 +50,17 @@ class Frame:
             'pink': (255, 0, 255),
         }
     
+    def put_text(self, frame, label, position, fontSize = 0.8):
+        cv.putText(frame, label, position, self.font, fontSize, self.colors['yellow'], 2)
+        
+    def line(self, frame, start_point, end_point, color = global_colors.blue):
+        cv.line(frame, start_point, end_point, color, 4)
+        
+    def circle(self, frame, center, color = global_colors.yellow):
+        cv.circle(frame, center, 7, color, -1)
+    
     def add_meta_info(self, frame, text, font, color, position):
-        w, h = self.height, self.width
+        w, h = frame.shape[1], frame.shape[0]
         text_size = cv.getTextSize(text, font, 1, 2)[0]
         text_position = (w - text_size[0] - position[0], h - text_size[1] + position[1])
 
@@ -78,7 +87,7 @@ class Frame:
         # Draw lines connecting the center to the start and end points
         cv.line(frame, center, start_point, color, 2)
         cv.line(frame, center, end_point, color, 2)
-        
+
 class Record:
     def save_result(filename, result):
         dir = 'results'
