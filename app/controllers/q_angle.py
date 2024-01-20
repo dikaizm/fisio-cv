@@ -4,7 +4,7 @@ import cv2 as cv
 import mediapipe as mp
 import math
 import numpy as np
-from controllers.camera import Camera, Frame
+from controllers._old.camera import Camera, Frame
 
 class QAngle:
     def __init__(self):

@@ -46,6 +46,8 @@ class CarryingAngle:
 
         # Cosinus theta
         cos_theta = dot_product / (mag_BA * mag_BC)
+        # Ensure the argument is within the valid range [-1, 1]
+        cos_theta = max(min(cos_theta, 1), -1)
 
         # Sudut dalam radian
         theta_rad = math.acos(cos_theta)
@@ -67,7 +69,7 @@ class CarryingAngle:
         return Point(x, y)
     
     def interpret(self, angle):
-        if (angle < 22):
+        if (angle < 5):
             return 'cubitus varus'
         elif (angle >= 5 and angle <= 15):
             return 'normal'
@@ -122,11 +124,16 @@ class CarryingAngle:
                 # Draw a rectangle around the detected object and label
                 cv.rectangle(frame, (point_x, point_y), (point_x+w, point_y+h), colors.green, 2)
                 fr.circle(frame, (point.x, point.y))
-                fr.put_text(frame, str(i), (point.x + 10, point.y))
+                fr.put_text(frame, str(i), (point.x + 10, point.y), color=colors.white)
             #endfor
+            
+            fr.meta_info(frame, 'Keypoints req: 3', 'bottom_left', (0, -100), fontSize=1.2)
+            fr.meta_info(frame, 'Keypoints count: ' + str(len(keypoints)), 'bottom_left', (0, -50), fontSize=1.2)
             
             # Connect keypoints with lines
             if len(keypoints) == 3:
+                fr.meta_info(frame, 'Keypoints status: valid', 'bottom_left', fontSize=1.2, color=colors.green)
+                
                 # Draw line to each keypoints
                 for i in range(len(keypoints) - 1):
                     fr.line(frame, (keypoints[i].x, keypoints[i].y), (keypoints[i + 1].x, keypoints[i + 1].y))
@@ -153,15 +160,20 @@ class CarryingAngle:
                 fr.circle(frame, (point_hmrs_over.x, point_hmrs_over.y))
                 
                 carry_angle = self.calc_angle_mid(wrist, elbow, point_hmrs_over)
+                if wrist.x > point_hmrs_over.x:
+                    carry_angle *= -1
                 
+                # Object information
                 fr.put_text(frame, str(int(carry_angle)), (elbow.x + 10, elbow.y + 50), fontSize=1)
                 
-                fr.put_text(frame, 'Carrying angle: ' + str(int(carry_angle)), (10, 50), fontSize=1.5)
-                
-                fr.put_text(frame, 'Condition: ' + self.interpret(carry_angle), (10, 100), fontSize=1.5)
+                fr.meta_info(frame, 'Carrying angle: ' + str(int(carry_angle)))
+                fr.meta_info(frame, 'Condition: ' + self.interpret(carry_angle), 'top_left', (0, 50), fontSize=1.5)
                 
                 # Save results
                 self.results.append((int(carry_angle), datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S')))
+                
+            else:
+                fr.meta_info(frame, 'Keypoints status: invalid', 'bottom_left', fontSize=1.2, color=colors.red)
             
             
             ret, buffer = cv.imencode('.jpg', frame)

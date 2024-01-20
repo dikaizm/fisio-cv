@@ -5,7 +5,7 @@ import mediapipe as mp
 import math
 
 import numpy as np
-from controllers.camera import Camera, Frame
+from controllers._old.camera import Camera, Frame
 
 class ForwardShoulderAngle:
     def __init__(self):

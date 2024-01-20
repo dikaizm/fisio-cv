@@ -55,7 +55,7 @@ class CraniovertebraAngle:
                 
                 cv.rectangle(frame, (point_x, point_y), (point_x+w, point_y+h), colors.green, 2)
                 fr.circle(frame, (point.x, point.y))
-                fr.put_text(frame, str(i), (point.x + 10, point.y))
+                fr.put_text(frame, str(i), (point.x + 10, point.y), color=colors.white)
             #endfor 
             
             # Connect keypoints with lines

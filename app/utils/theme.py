@@ -7,3 +7,4 @@ class Colors:
         self.light_green = (127, 233, 100)
         self.yellow = (0, 255, 255)
         self.pink = (255, 0, 255)
+        self.white = (255, 255, 255)

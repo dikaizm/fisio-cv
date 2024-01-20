@@ -3,7 +3,7 @@ from datetime import datetime
 import cv2 as cv
 import mediapipe as mp
 import math
-from controllers.camera import Camera, Frame, Record
+from controllers._old.camera import Camera, Frame, Record
 
 class CraniovertebraAngle:
     def __init__(self):

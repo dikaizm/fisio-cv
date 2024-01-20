@@ -3,7 +3,7 @@ import os
 import cv2 as cv
 import math
 import numpy as np
-from controllers.theme import Colors
+from controllers._old.theme import Colors
 
 class Camera:
     def __init__(self):

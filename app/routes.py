@@ -3,7 +3,7 @@ from controllers.craniovertebra_angle import CraniovertebraAngle
 from controllers.forward_shoulder_angle import ForwardShoulderAngle
 from controllers.carrying_angle import CarryingAngle
 from controllers.q_angle import QAngle
-from controllers.camera import Record
+from utils.save import Save
 
 class Routes:
     def __init__(self, app):
@@ -40,7 +40,7 @@ class Routes:
         def record_cv():
             res = self.cv.results
             if res:
-                Record.save_result('craniovertebra', res)
+                Save.create('craniovertebra', res)
                 return jsonify("success")
             else:
                 return jsonify("failed")
@@ -60,7 +60,7 @@ class Routes:
         def record_fsa():
             res = self.fsa.results
             if res:
-                Record.save_result('forward_shoulder', res)
+                Save.create('forward_shoulder', res)
                 return jsonify("success")
             else:
                 return jsonify("failed")
@@ -78,7 +78,7 @@ class Routes:
         def record_carry():
             res = self.carry.results
             if res:
-                Record.save_result('carrying', res)
+                Save.create('carrying', res)
                 return jsonify("success")
             else:
                 return jsonify("failed")
@@ -96,7 +96,7 @@ class Routes:
         def record_q():
             res = self.q.results
             if res:
-                Record.save_result('q_angle', res)
+                Save.create('q_angle', res)
                 return jsonify("success")
             else:
                 return jsonify("failed")
