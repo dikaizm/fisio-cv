@@ -2,7 +2,7 @@ from datetime import datetime
 import time
 import cv2 as cv
 import math
-
+from utils.theme import Colors
 from utils.color_detection import ColorDetection, Point
 from utils.camera import Camera, Frame
 
@@ -29,6 +29,7 @@ class ForwardShoulderAngle:
             return ''
     
     def run(self):
+        colors = Colors()
         detect = ColorDetection()
         fr = Frame()
         camera = Camera()
@@ -56,15 +57,18 @@ class ForwardShoulderAngle:
                 keypoints.append(point)
 
                 # Draw a rectangle around the detected object and label
-                cv.rectangle(frame, (point_x, point_y), (point_x+w, point_y+h), (0, 255, 0), 2)
+                cv.rectangle(frame, (point_x, point_y), (point_x+w, point_y+h), colors.green, 2)
                 fr.circle(frame, (point.x, point.y))
                 fr.put_text(frame, str(i), (point.x + 10, point.y))
+            #endfor
             
             # Connect keypoints with lines
-            if len(keypoints) == 3:                
+            if len(keypoints) == 3:       
+                # Draw vertical line from C7  
                 fr.line(frame, (keypoints[1].x, keypoints[1].y), (keypoints[1].x, keypoints[1].y - 200))
                 fr.line(frame, (keypoints[1].x, keypoints[1].y), (keypoints[1].x, keypoints[1].y + 200))
                 
+                # Draw line to each keypoints
                 for i in range(len(keypoints) - 1):
                     fr.line(frame, (keypoints[i].x, keypoints[i].y), (keypoints[i + 1].x, keypoints[i + 1].y))
                     
