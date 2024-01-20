@@ -59,12 +59,12 @@ class CarryingAngle:
         return math.sqrt((x2 - x1)**2 + (y2 - y1)**2)
         
     def find_endpoint(self, point: Point, distance, angle):
-        rad = math.radians(angle)
+        rad = math.radians(angle + 180)
         
         x = int(point.x + distance * np.sin(rad))
         y = int(point.y + distance * np.cos(rad))
         
-        return x, y   
+        return Point(x, y)
     
     def interpret(self, angle):
         if (angle < 22):
@@ -74,25 +74,24 @@ class CarryingAngle:
         else:
             return 'cubitus valgus'
     
-    def draw_line_over(self, frame, center, radius, end_angle, direction, color = global_colors.yellow):
+    def draw_line_over(self, frame, center: Point, radius, end_angle, direction, color = global_colors.yellow):
         # Convert angles to radians
         end_angle_rad = math.radians(end_angle)
 
         # Calculate end points of the line
         if direction == 1:
             end_point = (
-                int(center[0] - radius * np.sin(end_angle_rad)),
-                int(center[1] - radius * np.cos(end_angle_rad))
+                int(center.x - radius * np.sin(end_angle_rad)),
+                int(center.y - radius * np.cos(end_angle_rad))
             )
         elif direction == -1:
             end_point = (
-                int(center[0] + radius * np.sin(end_angle_rad)),
-                int(center[1] + radius * np.cos(end_angle_rad))
+                int(center.x + radius * np.sin(end_angle_rad)),
+                int(center.y + radius * np.cos(end_angle_rad))
             )
         
-        cv.line(frame, center, end_point, color, 2)
+        cv.line(frame, (center.x, center.y), end_point, color, 2)
     
-
     def run(self):
         colors = Colors()
         detect = ColorDetection()
@@ -136,24 +135,24 @@ class CarryingAngle:
                 elbow = Point(keypoints[1].x, keypoints[1].y)
                 wrist = Point(keypoints[2].x, keypoints[2].y)
                 
-                elbow_humerus_angle = self.calc_angle(elbow, humerus)
-                wrist_elbow_angle = self.calc_angle(elbow, wrist)
+                humerus_elbow_angle = self.calc_angle(humerus, elbow)
+                elbow_wrist_angle = self.calc_angle(elbow, wrist)
                 
                 # Draw line over upper arm
-                self.draw_line_over(frame, (humerus.x, humerus.y), 400, elbow_humerus_angle, 1)
+                self.draw_line_over(frame, elbow, 400, humerus_elbow_angle, 1)
+                self.draw_line_over(frame, humerus, 400, humerus_elbow_angle, -1)
                 
                 # Draw line over lower arm
-                self.draw_line_over(frame, (wrist.x, wrist.y), 400, wrist_elbow_angle, 1)
-                self.draw_line_over(frame, (elbow.x, elbow.y), 400, wrist_elbow_angle, -1)
+                self.draw_line_over(frame, wrist, 400, elbow_wrist_angle, 1)
+                self.draw_line_over(frame, elbow, 400, elbow_wrist_angle, -1)
                 
                 dist_elbow_wrist = self.calc_distance(elbow, wrist)
                 
-                x_end, y_end = self.find_endpoint(elbow, dist_elbow_wrist, elbow_humerus_angle)
-                point_end = Point(x_end, y_end)
+                point_hmrs_over = self.find_endpoint(elbow, dist_elbow_wrist, humerus_elbow_angle)
                 
-                fr.circle(frame, (point_end.x, point_end.y))
+                fr.circle(frame, (point_hmrs_over.x, point_hmrs_over.y))
                 
-                carry_angle = self.calc_angle_mid(wrist, elbow, point_end)
+                carry_angle = self.calc_angle_mid(wrist, elbow, point_hmrs_over)
                 
                 fr.put_text(frame, str(int(carry_angle)), (elbow.x + 10, elbow.y + 50), fontSize=1)
                 
