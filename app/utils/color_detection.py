@@ -9,13 +9,17 @@ class ColorDetection:
         hsv = cv.cvtColor(frame, cv.COLOR_BGR2HSV)
 
         # lower boundary GREEN color range values
-        lower = np.array([40, 100, 100])
+        lower = np.array([35, 100, 60])
         upper = np.array([70, 255, 255])
         
         mask = cv.inRange(hsv, lower, upper)
         
-        # mask color
+        # Get only masked color
         # result = cv.bitwise_and(frame, frame, mask=mask)
+        
+        # Morphological operations
+        mask = cv.morphologyEx(mask, cv.MORPH_OPEN, (5, 5))
+        mask = cv.morphologyEx(mask, cv.MORPH_CLOSE, (5, 5))
         
         # Find contours in the mask
         contours, _ = cv.findContours(mask, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE)
