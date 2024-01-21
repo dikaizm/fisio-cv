@@ -34,6 +34,8 @@ addMenuCard("/carrying", "Carrying Angle", "https://clinicalgate.com/wp-content/
 
 addMenuCard("/q_angle", "Q Angle", "https://www.researchgate.net/profile/Alfred-Atanda/publication/38062380/figure/fig13/AS:394157177753602@1470985802902/The-Q-angle-is-defined-as-the-angle-between-a-line-drawn-from-the-anterior-superior-iliac.png")
 
+addMenuCard("/clark_angle", "Clark Angle", "https://www.researchgate.net/publication/361640780/figure/fig1/AS:11431281172330157@1688505696127/Clarkes-angle-measurement-method-using-footprints-A-the-most-medial-point-of-the.tif")
+
 
 function saveData(endpoint) {
     let xhr = new XMLHttpRequest();
@@ -66,22 +68,27 @@ function saveData(endpoint) {
 var currEndpoint = window.location.pathname;
 
 if (currEndpoint == "/carrying") {
-    document.getElementById("btn_record_carry").addEventListener("click", function() {
-        saveData("/record_carry")
+    document.getElementById("btn_save_carry").addEventListener("click", function() {
+        saveData("/save_carry")
     });
 }
 if (currEndpoint == "/craniovertebra") {
-    document.getElementById("btn_record_cv").addEventListener("click", function() {
-        saveData("/record_cv")
+    document.getElementById("btn_save_cv").addEventListener("click", function() {
+        saveData("/save_cv")
     });
 }
 if (currEndpoint == "/forward_shoulder") {
-    document.getElementById("btn_record_fsa").addEventListener("click", function() {
-        saveData("/record_fsa")
+    document.getElementById("btn_save_fsa").addEventListener("click", function() {
+        saveData("/save_fsa")
     });
 }
 if (currEndpoint == "/q_angle") {
-    document.getElementById("btn_record_q").addEventListener("click", function() {
-        saveData("/record_q")
+    document.getElementById("btn_save_q").addEventListener("click", function() {
+        saveData("/save_q")
+    });
+}
+if (currEndpoint == "/clark_angle") {
+    document.getElementById("btn_save_clark").addEventListener("click", function() {
+        saveData("/save_clark")
     });
 }

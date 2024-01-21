@@ -1,4 +1,5 @@
 from flask import render_template, Response, jsonify
+from controllers.clark_angle import ClarkAngle
 from controllers.craniovertebra_angle import CraniovertebraAngle
 from controllers.forward_shoulder_angle import ForwardShoulderAngle
 from controllers.carrying_angle import CarryingAngle
@@ -12,6 +13,7 @@ class Routes:
         self.fsa = ForwardShoulderAngle()
         self.carry = CarryingAngle()
         self.q = QAngle()
+        self.clark = ClarkAngle()
 
     def setup(self):
         self.index()
@@ -19,6 +21,7 @@ class Routes:
         self.forward_shoulder()
         self.carrying()
         self.q_angle()
+        self.clark_angle()
 
     # Home
     def index(self):
@@ -36,8 +39,8 @@ class Routes:
         def craniovertebra_vid():
             return Response(self.cv.run(), mimetype='multipart/x-mixed-replace; boundary=frame')
         
-        @self.app.route('/record_cv')
-        def record_cv():
+        @self.app.route('/save_cv')
+        def save_cv():
             res = self.cv.results
             if res:
                 Save.create('craniovertebra', res)
@@ -56,8 +59,8 @@ class Routes:
         def forward_shoulder_vid():
             return Response(self.fsa.run(), mimetype='multipart/x-mixed-replace; boundary=frame')
         
-        @self.app.route('/record_fsa')
-        def record_fsa():
+        @self.app.route('/save_fsa')
+        def save_fsa():
             res = self.fsa.results
             if res:
                 Save.create('forward_shoulder', res)
@@ -74,8 +77,8 @@ class Routes:
         def carrying_vid():
             return Response(self.carry.run(), mimetype='multipart/x-mixed-replace; boundary=frame')
         
-        @self.app.route('/record_carry')
-        def record_carry():
+        @self.app.route('/save_carry')
+        def save_carry():
             res = self.carry.results
             if res:
                 Save.create('carrying', res)
@@ -92,9 +95,27 @@ class Routes:
         def q_angle_vid():
             return Response(self.q.run(), mimetype='multipart/x-mixed-replace; boundary=frame')
         
-        @self.app.route('/record_q')
-        def record_q():
+        @self.app.route('/save_q')
+        def save_q():
             res = self.q.results
+            if res:
+                Save.create('q_angle', res)
+                return jsonify("success")
+            else:
+                return jsonify("failed")
+            
+    def clark_angle(self):
+        @self.app.route('/clark_angle')
+        def clark_angle():
+            return render_template('clark_angle.html')
+        
+        @self.app.route('/clark_angle_vid')
+        def clark_angle_vid():
+            return Response(self.clark.run(), mimetype='multipart/x-mixed-replace; boundary=frame')
+        
+        @self.app.route('/save_clark')
+        def save_clark():
+            res = self.clark.results
             if res:
                 Save.create('q_angle', res)
                 return jsonify("success")
