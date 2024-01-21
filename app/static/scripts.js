@@ -26,6 +26,28 @@ function addMenuCard(route, title, imageSrc) {
     if (mainMenu) mainMenu.appendChild(menuCard);
 }
 
+function addMenuCardType(title, imageSrc) {
+    var menuCard = document.createElement("div");
+    menuCard.className = "bg-white rounded-lg shadow-sm border border-gray-300 overflow-hidden p-4 box-border relative flex flex-col gap-2 justify-between";
+
+    menuCard.innerHTML = `
+        <div class="flex flex-col gap-2">
+            <div class="w-full h-48 border border-gray-300 rounded-md overflow-hidden">
+                <img class="object-cover w-full h-full" src="${imageSrc}" alt="menu card image">
+            </div>
+            <h3 class="font-bold text-lg text-center">${title}</h3>
+        </div>
+        
+        <a href="${route}" class="font-bold text-white rounded-full bg-blue-500 p-2 text-center flex items-center justify-center gap-3">
+            <div class="w-6 h-6">${iconCamera()}</div>
+            <span class="hidden sm:inline">Buka Kamera</span>
+        </a>
+    `;
+    
+    mainMenu = document.getElementById("main-menu");
+    if (mainMenu) mainMenu.appendChild(menuCard);
+}
+
 addMenuCard("/craniovertebra", "Craniovertebra Angle", "https://www.researchgate.net/profile/Walaa-Elsayed/publication/347892270/figure/fig1/AS:972676877283329@1608915647914/Measurement-of-Craniovertebral-angle.ppm")
 
 addMenuCard("/forward_shoulder", "Forward Shoulder Angle", "https://www.researchgate.net/profile/Darin-Padua/publication/41122480/figure/fig1/AS:394259766235139@1471010261363/Forward-head-angle-FHA-measured-from-the-vertical-anteriorly-to-a-line-connecting-the.png")
@@ -36,7 +58,10 @@ addMenuCard("/q_angle", "Q Angle", "https://www.researchgate.net/profile/Alfred-
 
 addMenuCard("/clark_angle", "Clark Angle", "https://www.researchgate.net/publication/361640780/figure/fig1/AS:11431281172330157@1688505696127/Clarkes-angle-measurement-method-using-footprints-A-the-most-medial-point-of-the.tif")
 
-addMenuCard("hallux_valgus", "Hallux Valgus Angle", "https://upload.wikimedia.org/wikipedia/commons/thumb/c/ce/Hallux_Valgus-Aspect_pr%C3%A9_op_d%C3%A9charge.JPG/800px-Hallux_Valgus-Aspect_pr%C3%A9_op_d%C3%A9charge.JPG")
+addMenuCard("/hallux_valgus", "Hallux Valgus Angle", "https://upload.wikimedia.org/wikipedia/commons/thumb/c/ce/Hallux_Valgus-Aspect_pr%C3%A9_op_d%C3%A9charge.JPG/800px-Hallux_Valgus-Aspect_pr%C3%A9_op_d%C3%A9charge.JPG")
+
+addMenuCard("/thigh_foot", "Thigh Foot Angle", "")
+
 
 
 function saveData(endpoint) {

@@ -1,4 +1,5 @@
 from flask import render_template, Response, jsonify
+from controllers.thigh_foot_angle import ThighFootAngle
 from controllers.hallux_valgus_angle import HalluxValgusAngle
 from controllers.clark_angle import ClarkAngle
 from controllers.craniovertebra_angle import CraniovertebraAngle
@@ -16,6 +17,7 @@ class Routes:
         self.q = QAngle()
         self.clark = ClarkAngle()
         self.hallux = HalluxValgusAngle()
+        self.thigh_foot = ThighFootAngle()
 
     def setup(self):
         self.index()
@@ -25,6 +27,7 @@ class Routes:
         self.q_angle()
         self.clark_angle()
         self.hallux_valgus()
+        self.thigh_foot_angle()
 
     # Home
     def index(self):
@@ -136,9 +139,27 @@ class Routes:
         
         @self.app.route('/save_hallux')
         def save_hallux():
-            res = self.clark.results
+            res = self.hallux_valgus.results
             if res:
                 Save.create('hallux_valgus', res)
+                return jsonify("success")
+            else:
+                return jsonify("failed")
+            
+    def thigh_foot_angle(self):
+        @self.app.route('/thigh_foot')
+        def thigh_foot():
+            return render_template('thigh_foot.html')
+        
+        @self.app.route('/thigh_foot_vid')
+        def thigh_foot_vid():
+            return Response(self.thigh_foot.run(), mimetype='multipart/x-mixed-replace; boundary=frame')
+        
+        @self.app.route('/save_thigh_foot')
+        def save_thigh_foot():
+            res = self.thigh_foot.results
+            if res:
+                Save.create('thigh_foot_angle', res)
                 return jsonify("success")
             else:
                 return jsonify("failed")
