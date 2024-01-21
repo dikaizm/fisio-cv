@@ -1,4 +1,5 @@
 from flask import render_template, Response, jsonify
+from controllers.hallux_valgus_angle import HalluxValgusAngle
 from controllers.clark_angle import ClarkAngle
 from controllers.craniovertebra_angle import CraniovertebraAngle
 from controllers.forward_shoulder_angle import ForwardShoulderAngle
@@ -14,6 +15,7 @@ class Routes:
         self.carry = CarryingAngle()
         self.q = QAngle()
         self.clark = ClarkAngle()
+        self.hallux = HalluxValgusAngle()
 
     def setup(self):
         self.index()
@@ -22,6 +24,7 @@ class Routes:
         self.carrying()
         self.q_angle()
         self.clark_angle()
+        self.hallux_valgus()
 
     # Home
     def index(self):
@@ -118,6 +121,24 @@ class Routes:
             res = self.clark.results
             if res:
                 Save.create('q_angle', res)
+                return jsonify("success")
+            else:
+                return jsonify("failed")
+            
+    def hallux_valgus(self):
+        @self.app.route('/hallux_valgus')
+        def hallux_valgus():
+            return render_template('hallux_valgus.html')
+        
+        @self.app.route('/hallux_valgus_vid')
+        def hallux_valgus_vid():
+            return Response(self.hallux.run(), mimetype='multipart/x-mixed-replace; boundary=frame')
+        
+        @self.app.route('/save_hallux')
+        def save_hallux():
+            res = self.clark.results
+            if res:
+                Save.create('hallux_valgus', res)
                 return jsonify("success")
             else:
                 return jsonify("failed")

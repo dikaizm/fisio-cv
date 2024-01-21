@@ -12,10 +12,6 @@ global_colors = Colors()
 
 class CarryingAngle:
     def __init__(self):
-        self.mp_pose = mp.solutions.pose
-        self.pose = self.mp_pose.Pose(min_detection_confidence=0.5, min_tracking_confidence=0.5)
-        self.mp_draw = mp.solutions.drawing_utils
-        self.mp_draw_style = mp.solutions.drawing_styles
         self.results = []
 
     def calc_angle(self, point1: Point, point2: Point):

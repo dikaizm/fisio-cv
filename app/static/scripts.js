@@ -36,6 +36,8 @@ addMenuCard("/q_angle", "Q Angle", "https://www.researchgate.net/profile/Alfred-
 
 addMenuCard("/clark_angle", "Clark Angle", "https://www.researchgate.net/publication/361640780/figure/fig1/AS:11431281172330157@1688505696127/Clarkes-angle-measurement-method-using-footprints-A-the-most-medial-point-of-the.tif")
 
+addMenuCard("hallux_valgus", "Hallux Valgus Angle", "https://upload.wikimedia.org/wikipedia/commons/thumb/c/ce/Hallux_Valgus-Aspect_pr%C3%A9_op_d%C3%A9charge.JPG/800px-Hallux_Valgus-Aspect_pr%C3%A9_op_d%C3%A9charge.JPG")
+
 
 function saveData(endpoint) {
     let xhr = new XMLHttpRequest();
@@ -90,5 +92,10 @@ if (currEndpoint == "/q_angle") {
 if (currEndpoint == "/clark_angle") {
     document.getElementById("btn_save_clark").addEventListener("click", function() {
         saveData("/save_clark")
+    });
+}
+if (currEndpoint == "/hallux_valgus") {
+    document.getElementById("btn_save_hallux").addEventListener("click", function() {
+        saveData("/save_hallux")
     });
 }

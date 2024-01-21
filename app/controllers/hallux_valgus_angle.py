@@ -10,7 +10,7 @@ from utils.camera import Camera, Frame
 
 global_colors = Colors()
 
-class QAngle:
+class HalluxValgusAngle:
     def __init__(self):
         self.results = []
 
@@ -70,12 +70,14 @@ class QAngle:
         return Point(x, y)
     
     def interpret(self, angle):
-        if (angle < 10):
-            return 'bow legged (genu valgum)'
-        elif (angle < 15):
+        if (angle < 15):
             return 'normal'
+        elif (angle >= 15 and angle <= 20):
+            return 'ringan'
+        elif (angle > 20 and angle <= 40):
+            return 'sedang'
         else:
-            return 'knok-kneed (genu varum)'
+            return 'berat'
     
     def draw_line_over(self, frame, center: Point, radius, end_angle, direction, color = global_colors.yellow):
         # Convert angles to radians
@@ -139,29 +141,29 @@ class QAngle:
                 for i in range(len(keypoints) - 1):
                     fr.line(frame, (keypoints[i].x, keypoints[i].y), (keypoints[i + 1].x, keypoints[i + 1].y))
                 
-                asis = Point(keypoints[0].x, keypoints[0].y)
-                cPatella = Point(keypoints[1].x, keypoints[1].y)
-                tibialTub = Point(keypoints[2].x, keypoints[2].y)
+                tarsal = Point(keypoints[0].x, keypoints[0].y)
+                metatarsal = Point(keypoints[1].x, keypoints[1].y)
+                phalanges = Point(keypoints[2].x, keypoints[2].y)
                 
-                cPatella_tibialTub_angle = self.calc_angle(cPatella, tibialTub)
+                metatarsal_phalanges_angle = self.calc_angle(metatarsal, phalanges)
                                 
-                dist_cPatella_tibialTub = self.calc_distance(cPatella, tibialTub)
+                dist_tarsal_metatarsal = self.calc_distance(tarsal, metatarsal)
                 
                 # Find endpoint of the line
-                if tibialTub.x > cPatella.x:
-                    point_tibialTub_over = self.find_endpoint(cPatella, dist_cPatella_tibialTub, cPatella_tibialTub_angle, -1)
-                elif tibialTub.x < cPatella.x:
-                    point_tibialTub_over = self.find_endpoint(cPatella, dist_cPatella_tibialTub, cPatella_tibialTub_angle)
+                if phalanges.x > metatarsal.x:
+                    point_phalanges_over = self.find_endpoint(metatarsal, dist_tarsal_metatarsal, metatarsal_phalanges_angle, -1)
+                elif phalanges.x < metatarsal.x:
+                    point_phalanges_over = self.find_endpoint(metatarsal, dist_tarsal_metatarsal, metatarsal_phalanges_angle)
 
-                fr.circle(frame, (point_tibialTub_over.x, point_tibialTub_over.y), color=colors.green)
-                fr.line(frame, (cPatella.x, cPatella.y), (point_tibialTub_over.x, point_tibialTub_over.y))
+                fr.circle(frame, (point_phalanges_over.x, point_phalanges_over.y), color=colors.green)
+                fr.line(frame, (metatarsal.x, metatarsal.y), (point_phalanges_over.x, point_phalanges_over.y))
                 
-                q_angle = self.calc_angle_mid(asis, cPatella, point_tibialTub_over)
+                q_angle = self.calc_angle_mid(tarsal, metatarsal, point_phalanges_over)
                 
                 # Object information
-                fr.put_text(frame, str(int(q_angle)), (cPatella.x + 10, cPatella.y + 50), fontSize=1)
+                fr.put_text(frame, str(int(q_angle)), (metatarsal.x + 10, metatarsal.y + 50), fontSize=1)
                 
-                fr.meta_info(frame, 'Q angle: ' + str(int(q_angle)))
+                fr.meta_info(frame, 'Hallux valgus angle: ' + str(int(q_angle)))
                 fr.meta_info(frame, 'Condition: ' + self.interpret(q_angle), 'top_left', (0, 50), fontSize=1.5)
                 
                 # Save results
