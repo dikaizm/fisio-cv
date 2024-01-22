@@ -70,12 +70,12 @@ class ThighFootAngle:
         return Point(x, y)
     
     def interpret(self, angle):
-        if (angle < 10):
-            return 'bow legged (genu valgum)'
-        elif (angle < 15):
-            return 'normal'
+        if (angle >= 0 and angle <= 15):
+            return 'normal)'
+        elif (angle > 15):
+            return 'abnormal'
         else:
-            return 'knok-kneed (genu varum)'
+            return ''
     
     def draw_line_over(self, frame, center: Point, radius, end_angle, direction, color = global_colors.yellow):
         # Convert angles to radians
@@ -95,7 +95,7 @@ class ThighFootAngle:
         
         cv.line(frame, (center.x, center.y), end_point, color, 2)
     
-    def run(self):
+    def run(self, type):
         colors = Colors()
         detect = ColorDetection()
         fr = Frame()
@@ -112,21 +112,7 @@ class ThighFootAngle:
             # Sort contours based on y-coordinate (top to bottom)
             contours = sorted(contours, key=lambda c: cv.boundingRect(c)[1])
             
-            keypoints = []
-            
-            for i, contour in enumerate(contours, start=1):
-                # Get the bounding box of the contour
-                point_x, point_y, w, h = cv.boundingRect(contour)
-                
-                point = Point(point_x + w // 2, point_y + h // 2)
-
-                keypoints.append(point)
-
-                # Draw a rectangle around the detected object and label
-                cv.rectangle(frame, (point_x, point_y), (point_x+w, point_y+h), colors.green, 2)
-                fr.circle(frame, (point.x, point.y))
-                fr.put_text(frame, str(i), (point.x + 10, point.y), color=colors.white)
-            #endfor
+            keypoints = detect.get_keypoints(frame, contours)
             
             fr.meta_info(frame, 'Keypoints req: 3', 'bottom_left', (0, -100), fontSize=1.2)
             fr.meta_info(frame, 'Keypoints count: ' + str(len(keypoints)), 'bottom_left', (0, -50), fontSize=1.2)
@@ -139,33 +125,10 @@ class ThighFootAngle:
                 for i in range(len(keypoints) - 1):
                     fr.line(frame, (keypoints[i].x, keypoints[i].y), (keypoints[i + 1].x, keypoints[i + 1].y))
                 
-                asis = Point(keypoints[0].x, keypoints[0].y)
-                cPatella = Point(keypoints[1].x, keypoints[1].y)
-                tibialTub = Point(keypoints[2].x, keypoints[2].y)
-                
-                cPatella_tibialTub_angle = self.calc_angle(cPatella, tibialTub)
-                
-                dist_cPatella_tibialTub = self.calc_distance(cPatella, tibialTub)
-                
-                # Find endpoint of the line
-                if tibialTub.x > cPatella.x:
-                    point_tibialTub_over = self.find_endpoint(cPatella, dist_cPatella_tibialTub, cPatella_tibialTub_angle, -1)
-                elif tibialTub.x < cPatella.x:
-                    point_tibialTub_over = self.find_endpoint(cPatella, dist_cPatella_tibialTub, cPatella_tibialTub_angle)
-
-                fr.circle(frame, (point_tibialTub_over.x, point_tibialTub_over.y), color=colors.green)
-                fr.line(frame, (cPatella.x, cPatella.y), (point_tibialTub_over.x, point_tibialTub_over.y))
-                
-                q_angle = self.calc_angle_mid(asis, cPatella, point_tibialTub_over)
-                
-                # Object information
-                fr.put_text(frame, str(int(q_angle)), (cPatella.x + 10, cPatella.y + 50), fontSize=1)
-                
-                fr.meta_info(frame, 'Q angle: ' + str(int(q_angle)))
-                fr.meta_info(frame, 'Condition: ' + self.interpret(q_angle), 'top_left', (0, 50), fontSize=1.5)
-                
-                # Save results
-                self.results.append((int(q_angle), datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S')))
+                if type == "internal":
+                    self.internal(frame, keypoints)
+                elif type == "external":
+                    self.external(frame, keypoints)
                 
             else:
                 fr.meta_info(frame, 'Keypoints status: invalid', 'bottom_left', fontSize=1.2, color=colors.red)
@@ -175,3 +138,67 @@ class ThighFootAngle:
             frame = buffer.tobytes()
             yield (b'--frame\r\n'
                 b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
+
+    def internal(self, frame, keypoints):
+        colors = Colors()
+        fr = Frame()
+        
+        asis = Point(keypoints[0].x, keypoints[0].y)
+        cPatella = Point(keypoints[1].x, keypoints[1].y)
+        tibialTub = Point(keypoints[2].x, keypoints[2].y)
+        
+        cPatella_tibialTub_angle = self.calc_angle(cPatella, tibialTub)
+        
+        dist_cPatella_tibialTub = self.calc_distance(cPatella, tibialTub)
+        
+        # Find endpoint of the line
+        if tibialTub.x > cPatella.x:
+            point_tibialTub_over = self.find_endpoint(cPatella, dist_cPatella_tibialTub, cPatella_tibialTub_angle, -1)
+        elif tibialTub.x < cPatella.x:
+            point_tibialTub_over = self.find_endpoint(cPatella, dist_cPatella_tibialTub, cPatella_tibialTub_angle)
+
+        fr.circle(frame, (point_tibialTub_over.x, point_tibialTub_over.y), color=colors.green)
+        fr.line(frame, (cPatella.x, cPatella.y), (point_tibialTub_over.x, point_tibialTub_over.y))
+        
+        q_angle = self.calc_angle_mid(asis, cPatella, point_tibialTub_over)
+        
+        # Object information
+        fr.put_text(frame, str(int(q_angle)), (cPatella.x + 10, cPatella.y + 50), fontSize=1)
+        
+        fr.meta_info(frame, 'Thigh foot internal angle: ' + str(int(q_angle)))
+        fr.meta_info(frame, 'Condition: ' + self.interpret(q_angle), 'top_left', (0, 50), fontSize=1.5)
+        
+        # Save results
+        self.results.append((int(q_angle), datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S')))
+        
+    def external(self, frame, keypoints):
+        colors = Colors()
+        fr = Frame()
+        
+        asis = Point(keypoints[0].x, keypoints[0].y)
+        cPatella = Point(keypoints[1].x, keypoints[1].y)
+        tibialTub = Point(keypoints[2].x, keypoints[2].y)
+        
+        cPatella_tibialTub_angle = self.calc_angle(cPatella, tibialTub)
+        
+        dist_cPatella_tibialTub = self.calc_distance(cPatella, tibialTub)
+        
+        # Find endpoint of the line
+        if tibialTub.x > cPatella.x:
+            point_tibialTub_over = self.find_endpoint(cPatella, dist_cPatella_tibialTub, cPatella_tibialTub_angle, -1)
+        elif tibialTub.x < cPatella.x:
+            point_tibialTub_over = self.find_endpoint(cPatella, dist_cPatella_tibialTub, cPatella_tibialTub_angle)
+
+        fr.circle(frame, (point_tibialTub_over.x, point_tibialTub_over.y), color=colors.green)
+        fr.line(frame, (cPatella.x, cPatella.y), (point_tibialTub_over.x, point_tibialTub_over.y))
+        
+        q_angle = self.calc_angle_mid(asis, cPatella, point_tibialTub_over)
+        
+        # Object information
+        fr.put_text(frame, str(int(q_angle)), (cPatella.x + 10, cPatella.y + 50), fontSize=1)
+        
+        fr.meta_info(frame, 'Thigh foot external angle: ' + str(int(q_angle)))
+        fr.meta_info(frame, 'Condition: ' + self.interpret(q_angle), 'top_left', (0, 50), fontSize=1.5)
+        
+        # Save results
+        self.results.append((int(q_angle), datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S')))

@@ -151,9 +151,13 @@ class Routes:
         def thigh_foot():
             return render_template('thigh_foot.html')
         
-        @self.app.route('/thigh_foot_vid')
-        def thigh_foot_vid():
-            return Response(self.thigh_foot.run(), mimetype='multipart/x-mixed-replace; boundary=frame')
+        @self.app.route('/thigh_foot_internal_vid')
+        def thigh_foot_internal_vid():
+            return Response(self.thigh_foot.run('internal'), mimetype='multipart/x-mixed-replace; boundary=frame')
+        
+        @self.app.route('/thigh_foot_external_vid')
+        def thigh_foot_external_vid():
+            return Response(self.thigh_foot.run('external'), mimetype='multipart/x-mixed-replace; boundary=frame')
         
         @self.app.route('/save_thigh_foot')
         def save_thigh_foot():
